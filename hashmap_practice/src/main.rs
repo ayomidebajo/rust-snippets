@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 
+// Todo: Write this hashmap set using arcmutex
 fn main() {
     let mut pratice_hash_map = HashMap::new();
 
