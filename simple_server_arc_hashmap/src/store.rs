@@ -68,3 +68,17 @@ pub async fn delete_grocery_list_item(
         http::StatusCode::OK,
     ))
 }
+
+pub async fn update_grocery_list_item(
+    item: Item,
+    store: Store,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let mut var_store = store.grocery_list.lock().expect("Data is poisoned");
+
+    var_store.insert(item.name, item.quantity);
+
+    Ok(warp::reply::with_status(
+        "Updated item in store",
+        http::StatusCode::CREATED,
+    ))
+}
