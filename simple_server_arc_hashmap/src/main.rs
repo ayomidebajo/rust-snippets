@@ -1,9 +1,16 @@
-use store::{add_grocery_list_item, get_grocery_list, Item, Store};
+use store::{add_grocery_list_item, delete_grocery_list_item, get_grocery_list, Id, Item, Store};
 use warp::Filter;
 
 mod store;
 
+// for extracting the input made by the user/client
 fn json_body() -> impl Filter<Extract = (Item,), Error = warp::Rejection> + Clone {
+    // When accepting a body, we want a JSON body
+    // (and to reject huge payloads)...
+    warp::body::content_length_limit(1024 * 16).and(warp::body::json())
+}
+
+fn delete_json() -> impl Filter<Extract = (Id,), Error = warp::Rejection> + Clone {
     // When accepting a body, we want a JSON body
     // (and to reject huge payloads)...
     warp::body::content_length_limit(1024 * 16).and(warp::body::json())
@@ -29,7 +36,15 @@ async fn main() {
         .and(store_filter.clone())
         .and_then(get_grocery_list);
 
-    let routes = add_items.or(get_items);
+    let delete_item = warp::delete()
+        .and(warp::path("v1"))
+        .and(warp::path("groceries"))
+        .and(warp::path::end())
+        .and(delete_json())
+        .and(store_filter.clone())
+        .and_then(delete_grocery_list_item);
+
+    let routes = add_items.or(get_items).or(delete_item);
 
     // let hello_path = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
 

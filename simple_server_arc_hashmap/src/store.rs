@@ -11,6 +11,11 @@ pub struct Item {
     quantity: i32,
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Id {
+    name: String,
+}
+
 #[derive(Clone)]
 pub struct Store {
     grocery_list: Arc<Mutex<Items>>,
@@ -48,4 +53,18 @@ pub async fn get_grocery_list(store: Store) -> Result<impl warp::Reply, warp::Re
     }
 
     Ok(warp::reply::json(&result))
+}
+
+pub async fn delete_grocery_list_item(
+    id: Id,
+    store: Store,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let mut r = store.grocery_list.lock().expect("Poisoned!!!");
+
+    r.remove(&id.name);
+
+    Ok(warp::reply::with_status(
+        "Removed item from list",
+        http::StatusCode::OK,
+    ))
 }
