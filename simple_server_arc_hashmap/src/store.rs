@@ -1,37 +1,51 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use warp::http;
 
-type Items = HashMap<String, i32>;
+pub type Items = HashMap<String, i32>;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-struct Item {
+pub struct Item {
     name: String,
     quantity: i32,
 }
 
 #[derive(Clone)]
-struct Store {
+pub struct Store {
     grocery_list: Arc<Mutex<Items>>,
 }
 
 impl Store {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Store {
-            grocery_list: Arc::new(Mutex::new(Hash::new())),
+            grocery_list: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
 
-async fn add_grocery_list_item(
-    store: Store,
+pub async fn add_grocery_list_item(
     item: Item,
+    store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let var_store = store.grocery_list.lock().expect("Data is poisoned");
+    let mut var_store = store.grocery_list.lock().expect("Data is poisoned");
 
     var_store.insert(item.name, item.quantity);
 
     Ok(warp::reply::with_status(
         "Added to store",
-        https::StatusCode::CREATED,
+        http::StatusCode::CREATED,
     ))
+}
+
+pub async fn get_grocery_list(store: Store) -> Result<impl warp::Reply, warp::Rejection> {
+    let mut result = HashMap::new();
+
+    let r = store.grocery_list.lock().expect("Poisoned!!!");
+
+    for (key, value) in r.iter() {
+        result.insert(key, value);
+    }
+
+    Ok(warp::reply::json(&result))
 }
