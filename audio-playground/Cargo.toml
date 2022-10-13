@@ -1,0 +1,11 @@
+[package]
+name = "audio-playground"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+hound = "3.5.0"
+crossbeam = "0.8.2"
+soundio = "0.2.1"
+sdl2 = "0.35"
