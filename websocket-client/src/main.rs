@@ -50,7 +50,7 @@ async fn main() -> Result<(), AnyError> {
                                 }
                             }
 
-                            println!("Sent close message.");
+                            // println!("Sent close message.");
 
                             println!("Closing...");
                             return Ok(());
@@ -72,24 +72,24 @@ async fn main() -> Result<(), AnyError> {
     ws_stream.close(None).await?;
 
     println!("Sent close message.");
+// repeated code
+    // while let Some(item) = ws_stream.next().await {
+    //     match item {
+    //         Ok(msg) => {
+    //             match msg {
+    //                 Message::Close(frame) => {
+    //                     println!("Received close message: {:?}", frame);
 
-    while let Some(item) = ws_stream.next().await {
-        match item {
-            Ok(msg) => {
-                match msg {
-                    Message::Close(frame) => {
-                        println!("Received close message: {:?}", frame);
-
-                        break;
-                    },
-                    _ => (),
-                }
-            },
-            Err(e) => {
-                println!("Error receiving message: \n{0:?}\n{0}", e);
-            }
-        }
-    }
+    //                     break;
+    //                 },
+    //                 _ => (),
+    //             }
+    //         },
+    //         Err(e) => {
+    //             println!("Error receiving message: \n{0:?}\n{0}", e);
+    //         }
+    //     }
+    // }
 
     println!("Closing...");
     Ok(())
