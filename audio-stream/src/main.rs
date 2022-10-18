@@ -18,20 +18,21 @@ struct Opt {
 impl Opt {
     fn from_args() -> Self {
         // let app = clap::Command::new("record_wav").arg(arg!([DEVICE] "The audio device to use"));
-        let app = Command::new("record_wav").about("stuff").arg(Arg::new("DEVICE").help("The audio device to use").required(true)).get_matches();
+        // let app = Command::new("record_wav").about("stuff").arg(Arg::new("DEVICE").help("The audio device to use").required(true)).get_matches();
         #[cfg(all(
             any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd"),
             feature = "jack"
         ))]
         let app = app.arg(arg!(-j --jack "Use the JACK host"));
 
-    //      let host = cpal::default_host();
-    // let device = host
-    //     .default_output_device()
-    //     .expect("no output device available");
+         let host = cpal::default_host();
+    let device = host
+        .default_input_device()
+        .expect("no input device available");
+        let dev = String::from("USB PnP Sound Device");
         // let matches = app.get_matches();
    
-        let device = format!("{:?}", app.value_source("DEVICE").unwrap());
+        // let device = format!("{:?}", app.value_source("DEVICE").unwrap());
         // let device = matches.get_one(id)
 
         #[cfg(all(
@@ -47,7 +48,7 @@ impl Opt {
             not(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd")),
             not(feature = "jack")
         ))]
-        Opt { device }
+        Opt { device: dev }
     }
 }
 
@@ -131,7 +132,7 @@ fn main() -> Result<(), anyhow::Error> {
     stream.play()?;
 
     // Let recording go for roughly three seconds.
-    std::thread::sleep(std::time::Duration::from_secs(3));
+    std::thread::sleep(std::time::Duration::from_secs(10));
     drop(stream);
     writer.lock().unwrap().take().unwrap().finalize()?;
     println!("Recording {} complete!", PATH);
