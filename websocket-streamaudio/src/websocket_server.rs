@@ -2,15 +2,14 @@ use futures::sink::SinkExt;
 use futures::stream::StreamExt;
 
 use tokio::net::TcpListener;
-use std::fs::File;
-use std::io::prelude::*;
+
 use tokio_tungstenite::accept_async;
 use tokio_tungstenite::tungstenite::{Message, Error as WsError};
 
 type AnyError = Box<dyn std::error::Error + Send + Sync>;
 
 #[tokio::main]
-async fn main() -> Result<(), AnyError> {
+pub async fn server() -> Result<(), AnyError> {
     let addr = "127.0.0.1:9000";
     let listener = TcpListener::bind(addr).await?;
 
@@ -23,15 +22,15 @@ async fn main() -> Result<(), AnyError> {
         tokio::spawn(async move {
             let mut ws_stream = accept_async(stream).await?;
             println!("Handshake successful.");
-let new_file = File::create("/Users/ayomidebajo/IdeaProjects/rust_snippets/websocket-server/recorded.wav")?;
+
             while let Some(item) = ws_stream.next().await {
                 match item {
                     Ok(msg) => {
                         match msg {
-                            Message::Binary(text) => {
-                                // println!("Received text message: {:?}", text);
-                                new_file.write_all(text.copy());
-                                ws_stream.send(Message::Binary(text)).await?;
+                            Message::Text(text) => {
+                                println!("Received text message: {}", text);
+
+                                ws_stream.send(Message::Text(text)).await?;
 
                                 println!("Message sent back.");
                             },

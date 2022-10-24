@@ -193,6 +193,23 @@ where
         if let Some(writer) = guard.as_mut() {
             for &sample in input.iter() {
                 let sample: U = cpal::Sample::from(&sample);
+                // println!("aop {:?}", sample);
+                writer.write_sample(sample).ok();
+            }
+        }
+    }
+}
+
+fn write_output_data<T, U>(input: &[T], writer: &WavWriterHandle)
+where
+    T: cpal::Sample,
+    U: cpal::Sample + hound::Sample,
+{
+    if let Ok(mut guard) = writer.try_lock() {
+        if let Some(writer) = guard.as_mut() {
+            for &sample in input.iter() {
+                let sample: U = cpal::Sample::from(&sample);
+                // println!("aop {:?}", sample);
                 writer.write_sample(sample).ok();
             }
         }
