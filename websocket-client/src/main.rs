@@ -16,6 +16,7 @@ use std::sync::{Arc, Mutex};
 
 type AnyError = Box<dyn std::error::Error + Send + Sync>;
 
+// configure device for input
 #[derive(Debug)]
 struct Opt {
     #[cfg(all(
@@ -88,6 +89,7 @@ impl Opt {
         }
     }
 }
+// end of config
 
 #[tokio::main]
 async fn main() -> Result<(), AnyError> {
@@ -102,6 +104,7 @@ async fn main() -> Result<(), AnyError> {
 
     println!("Handshake successful.");
 
+    // saving, recording audio 
      let opt = Opt::from_args();
 
     // Conditionally compile with jack if the feature is specified.
