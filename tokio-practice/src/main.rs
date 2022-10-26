@@ -39,6 +39,8 @@ async fn main() {
     }
 }
 
+// todo learn about channels
+
 async fn process(socket: TcpStream, db: Db) {
     // A hashmap is used to store data
     // let mut db = HashMap::new();
