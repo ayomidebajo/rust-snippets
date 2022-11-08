@@ -55,7 +55,7 @@ impl Opt {
         //     .expect("no input device available");
 
         // Ayo's solution type=fast😂
-        let dev = String::from("USB PnP Sound Device");
+        let dev = String::from("MacBook Pro Microphone");
 
         // Ayo's second solution bypassing clap issues
         // let plainarg = app.clone();
