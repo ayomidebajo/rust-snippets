@@ -79,4 +79,7 @@ fn main() {
     }
 }
 
+// Create player thread.
+
+// differentiate between player thread and reciever thread
 
