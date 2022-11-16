@@ -48,18 +48,6 @@ fn main() -> anyhow::Result<()> {
         latency: 150.0
     };
 
-
-        let addr = "127.0.0.1:9000";
-    let url = format!("ws://{}", addr);
-
-    let stream = TcpStream::connect(addr).await?;
-
-    println!("Connected to {:?}", addr);
-
-    let (mut ws_stream, _) = client_async(&url, stream).await?;
-
-    println!("Handshake successful.");
-
     // Conditionally compile with jack if the feature is specified.
     #[cfg(all(
         any(

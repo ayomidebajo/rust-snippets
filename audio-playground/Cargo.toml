@@ -5,7 +5,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-hound = "3.5.0"
-crossbeam = "0.8.2"
-soundio = "0.2.1"
-sdl2 = "0.35"
+cpal = "0.14.0"
+clap = "4.0.15"
+ringbuf = "0.3.1"
+anyhow = "1.0.65"
+tokio = { version = "1.17.0", features = ["full"] }
+tokio-stream = { version = "0.1.11" }
+futures = "0.3.24"
+tokio-tungstenite = "0.17.2"
