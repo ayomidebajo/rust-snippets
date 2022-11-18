@@ -13,3 +13,4 @@ tokio = { version = "1.17.0", features = ["full"] }
 tokio-stream = { version = "0.1.11" }
 futures = "0.3.24"
 tokio-tungstenite = "0.17.2"
+regex = "1.7.0"
