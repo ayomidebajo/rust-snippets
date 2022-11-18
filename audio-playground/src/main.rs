@@ -55,6 +55,7 @@ struct Opt {
     jack: bool,
 }
 
+// for parsing duration
 fn parse_duration(duration: &str) -> time::Duration {
     let re = Regex::new(r"((?P<hour>\d+)h)?((?P<minute>\d+)m)?((?P<second>\d+)s)?").unwrap();
     let caps = re.captures(duration).unwrap();
