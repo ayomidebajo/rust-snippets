@@ -70,7 +70,7 @@ fn parse_duration(duration: &str) -> time::Duration {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
+async fn main() -> Result<()> {
     let opt = Opt {
         input_device: String::from("MacBook Pro Microphone"),
         output_device: String::from("MacBook Pro Speakers"),
@@ -118,157 +118,82 @@ async fn main() -> Result<(), anyhow::Error> {
     //     host.input_devices()?
     //         .find(|x| x.name().map(|y| y == opt.input_device).unwrap_or(false))
     // }
+    let (send_audio, recv_audio) = tokio::sync::watch::channel(Vec::new());
 
-    let addr = "127.0.0.1:9000";
-    let url = format!("ws://{}", addr);
+    let audio_thread = tokio::spawn(async move {
+        let pa = cpal::default_host();;
 
-    let stream = TcpStream::connect(addr).await?;
+        println!("PortAudio:");
+        // println!("version: {}", pa.);
+        // println!("version text: {:?}", pa.devices());
+        println!("device count: {}", pa.devices().unwrap());
 
-    println!("Just checking");
-    println!("Connected to {:?}", addr);
+        // let default_host = pa.default_host_api().unwrap();
+        // println!("default host: {:#?}", pa.host_api_info(default_host));
 
-    let (mut ws_stream, _) = client_async(&url, stream).await?;
+        let def_input = pa.default_input_device().unwrap();
+        // let input_info = pa.device_info(def_input).unwrap();
+        // println!("Default input device info: {:#?}", &input_info);
 
-    println!("Handshake successful.");
+        // Construct the input stream parameters.
+        let latency = input_info.default_low_input_latency;
+        println!("how far?");
 
-    let deadline = parse_duration("1m");
-    let start = time::Instant::now();
+        let input_params =
+            pa::StreamParameters::<u8>::new(def_input, CHANNELS, INTERLEAVED, latency);
+        // Check that the stream format is supported.
+        pa.is_input_format_supported(input_params, SAMPLE_RATE)
+            .unwrap();
+        println!("how far??");
+        // Construct the settings with which we'll open our input stream.
+        let settings = pa::InputStreamSettings::new(input_params, SAMPLE_RATE, FRAMES);
+        println!("how far???");
 
-    loop {
-        let elapsed = start.elapsed();
-        if deadline < elapsed {
-            break;
-        }
-        let text = String::from("Ebgudu");
-        let msg = Message::Text(text.clone());
+        // Keep track of the last `current_time` so we can calculate the delta time.
+        let mut maybe_last_time = None;
+        println!("how goes?");
 
-        ws_stream.send(msg).await?;
+        // We'll use this channel to send the count_down to the main thread for fun.
+        let (sender, receiver) = ::std::sync::mpsc::channel();
+        println!("how goess??");
 
-        println!("Message sent: {:?}", text);
+        // A callback to pass to the non-blocking stream.
+        let callback = move |pa::InputStreamCallbackArgs {
+                                 buffer,
+                                 frames,
+                                 time,
+                                 ..
+                             }| {
+            let current_time = time.current;
+            let prev_time = maybe_last_time.unwrap_or(current_time);
+            let dt = current_time - prev_time;
+            maybe_last_time = Some(current_time);
 
-        if let Some(item) = ws_stream.next().await {
-            match item {
-                Okr(msg) => {
-                    match msg {
-                        Message::Text(text) => {
-                            println!("Received text message: {}", text);
-                        }
-                        Message::Close(frame) => {
-                            println!("Received close message: {:?}", frame);
+            assert!(frames == FRAMES as usize);
+            sender.send(buffer.to_vec()).unwrap();
+            println!("buffer: {:?}", buffer);
+            pa::Continue
+        };
+        // println!("callback: {:?}", callback);
 
-                            if let Err(e) = ws_stream.close(None).await {
-                                match e {
-                                    WsError::ConnectionClosed => (),
-                                    _ => {
-                                        println!("Error while closing: {}", e);
-                                        break;
-                                    }
-                                }
-                            }
+        // Construct a stream with input and output sample types of f32.
+        let mut stream = pa.open_non_blocking_stream(settings, callback).unwrap();
 
-                            // println!("Sent close message.");
+        stream.start().unwrap();
 
-                            println!("Closing...");
-                            return Ok(());
-                        }
-                        _ => (),
-                    }
-                }
-                Err(e) => {
-                    println!("Error receiving message: \n{0:?}\n{0}", e);
-                }
+        // Loop while the non-blocking stream is active.
+        while let true = stream.is_active().unwrap() {
+            // Do some stuff!
+            while let Ok(data) = receiver.try_recv() {
+                // println!("test: {:?}", &data);
+                let test = send_audio.send(data).unwrap();
+                // println!("test: {:?}", test);
+                // println!("Data: {:?}", data);
             }
-        } else {
-            break;
         }
 
-        sleep(Duration::from_secs(1)).await;
-    }
+        stream.stop().unwrap();
+    });
 
-    ws_stream.close(None).await?;
-    // let output_device = if opt.output_device == "default" {
-    //     host.default_output_device()
-    // } else {
-    //     host.output_devices()?
-    //         .find(|x| x.name().map(|y| y == opt.output_device).unwrap_or(false))
-    // }
-    // .expect("failed to find output device");
-
-    // println!("Using input device: \"{}\"", input_device.name()?);
-    // println!("Using output device: \"{}\"", output_device.name()?);
-
-    // // We'll try and use the same configuration between streams to keep it simple.
-    // let config: cpal::StreamConfig = input_device.default_input_config()?.into();
-
-    // // Create a delay in case the input and output devices aren't synced.
-    // let latency_frames = (opt.latency / 1_000.0) * config.sample_rate.0 as f32;
-    // let latency_samples = latency_frames as usize * config.channels as usize;
-
-    // The buffer to share samples
-    // let ring = HeapRb::<f32>::new(latency_samples * 2);
-    // let (mut producer, mut consumer) = ring.split();
-
-    // // Fill the samples with 0.0 equal to the length of the delay.
-    // for _ in 0..latency_samples {
-    //     // The ring buffer has twice as much space as necessary to add latency here,
-    //     // so this should never fail
-    //     producer.push(0.0).unwrap();
-    // }
-
-    // let input_data_fn = move |data: &[f32], _: &cpal::InputCallbackInfo| {
-    //     let mut output_fell_behind = false;
-    //     for &sample in data {
-    //         if producer.push(sample).is_err() {
-    //             output_fell_behind = true;
-    //         }
-    //     }
-    //     if output_fell_behind {
-    //         eprintln!("output stream fell behind: try increasing latency");
-    //     }
-    // };
-
-    // let output_data_fn = move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-    //     let mut input_fell_behind = false;
-    //     for sample in data {
-    //         *sample = match consumer.pop() {
-    //             Some(s) => s,
-    //             None => {
-    //                 input_fell_behind = true;
-    //                 0.0
-    //             }
-    //         };
-    //     }
-    //     if input_fell_behind {
-    //         eprintln!("input stream fell behind: try increasing latency");
-    //     }
-    // };
-
-    // // Build streams.
-    // println!(
-    //     "Attempting to build both streams with f32 samples and `{:?}`.",
-    //     config
-    // );
-    // let input_stream = input_device.build_input_stream(&config, input_data_fn, err_fn)?;
-    // let output_stream = output_device.build_output_stream(&config, output_data_fn, err_fn)?;
-    // println!("Successfully built streams.");
-
-    // // Play the streams.
-    // println!(
-    //     "Starting the input and output streams with `{}` milliseconds of latency.",
-    //     opt.latency
-    // );
-    // input_stream.play()?;
-    // output_stream.play()?;
-
-    // // Run for 3 seconds before closing.
-    // println!("Playing for 3 seconds... ");
-    // std::thread::sleep(std::time::Duration::from_secs(5));
-    // drop(input_stream);
-    // drop(output_stream);
-    // println!("Done!");
     Ok(())
 }
-
-// fn err_fn(err: cpal::StreamError) {
-//     eprintln!("an error occurred on stream: {}", err);
-// }
