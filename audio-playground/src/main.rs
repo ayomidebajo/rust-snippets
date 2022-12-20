@@ -110,6 +110,7 @@ async fn main() -> Result<()> {
         not(feature = "jack")
     ))]
     let host = cpal::default_host();
+    // find ways to stream audio
 
     // Find devices.
     // let input_device = if opt.input_device == "default" {
