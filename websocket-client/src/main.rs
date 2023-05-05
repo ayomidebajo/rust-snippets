@@ -18,9 +18,11 @@ async fn main() -> Result<(), AnyError> {
 
     println!("Connected to {:?}", addr);
 
-    let (mut ws_stream, _) = client_async(&url, stream).await?;
+    let (mut ws_stream, stuff) = client_async(&url, stream).await?;
 
-    println!("Handshake successful.");
+    println!("Handshake successful. {:?},", stuff);
+
+    // write loop for audio buffer length and maybe create a struct to wrap the buffer which will contain the details for the buffer
 
     for n in 0..10 {
         let text = format!("This is message {}.", n);

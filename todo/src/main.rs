@@ -5,7 +5,7 @@ struct Todo {
     todos: Vec<String>,
 }
 
-pub fn todo() {
+pub fn main() {
     println!("Please input a todo");
     let mut new_vector = Vec::new();
     let mut new_todo_store = Todo { todos: new_vector };

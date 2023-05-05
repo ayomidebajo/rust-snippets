@@ -12,7 +12,7 @@ use tokio::net::TcpStream;
 use tokio::time::{sleep, Duration};
 
 use tokio_tungstenite::{client_async, WebSocketStream};
-use tokio_tungstenite::tungstenite::{Message, Error as WsError};
+use tokio_tungstenite::tungstenite::{Message, Error as AnyError};
 // type StateHandle = Arc<Mutex<Option<Vec<f32>>>>;
 
 fn main() -> Result<(), AnyError> {

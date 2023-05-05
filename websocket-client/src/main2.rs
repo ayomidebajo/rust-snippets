@@ -35,7 +35,7 @@ impl Opt {
             .about("stuff")
             .arg(
                 Arg::new("DEVICE")
-                    .help("The audio device to use")
+                    .help("The audio input device to use")
                     .required(true),
             )
             .get_matches();
@@ -183,7 +183,7 @@ async fn main() -> Result<(), AnyError> {
 
     stream.play()?;
 
-    // Let recording go for roughly three seconds.
+    // Let recording go for roughly ten seconds.
     std::thread::sleep(std::time::Duration::from_secs(10));
     drop(stream);
     writer.lock().unwrap().take().unwrap().finalize()?;
@@ -200,6 +200,8 @@ async fn main() -> Result<(), AnyError> {
         ws_stream.send(msg).await?;
 
         // println!("Message sent: {:?}", text);
+
+        // write logic to change this to an endless connection instead of some low level loop
 
         if let Some(item) = ws_stream.next().await {
             match item {
@@ -268,6 +270,8 @@ fn wav_spec_from_config(config: &cpal::SupportedStreamConfig) -> hound::WavSpec 
         sample_format: sample_format(config.sample_format()),
     }
 }
+
+// instead of writing to file, change to endless buffer
 
 type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
 

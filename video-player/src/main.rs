@@ -634,7 +634,7 @@ fn play_video(video: &mut VideoStreamData, rt: &RuntimeData) -> LoopState {
     LoopState::Running
 }
 
-fn get_audio_source_frames(audio: &mut AudioStreamData) -> Result<Vec<AudioFrame>>, LoopState> {
+fn get_audio_source_frames(audio: &mut AudioStreamData) -> Result<Vec<AudioFrame>, LoopState> {
     // Get a packet from the packet queue.
     let (packet, _loop_count) = if let Some(packet) = audio.stream.packet_queue.pop_front() {
         // Check what we found in the packet queue.
