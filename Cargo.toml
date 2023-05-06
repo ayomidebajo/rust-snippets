@@ -1,0 +1,20 @@
+[workspace]
+members = [
+	"advanced_rust",
+	"arcmutex_practice",
+	"audio-stream",
+	"devices-enumerate",
+	"directory_program",
+	"hashmap_practice",
+	"hello_world",
+	"imgtool",
+	"playground",
+	"simple_server_arc_hashmap",
+	"tictac_toe",
+	"todo",
+	"tokio-practice",
+	"websocket-client",
+	"websocket-server",
+	"websocket-streamaudio",
+	"word-counter",
+]
