@@ -17,4 +17,6 @@ members = [
 	"websocket-server",
 	"websocket-streamaudio",
 	"word-counter",
+	"playing_traits",
+	"task_manager",
 ]

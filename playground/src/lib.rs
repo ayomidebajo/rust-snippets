@@ -5,18 +5,18 @@ use std::io::prelude::BufRead;
 use std::io::BufReader;
 
 #[derive(Debug)]
-struct WordCounter(HashMap<String, u64>);
+pub struct WordCounter(pub HashMap<String, u64>);
 
 impl WordCounter {
-    fn new() -> WordCounter {
+    pub fn new() -> WordCounter {
         WordCounter(HashMap::new())
     }
-    fn increment(&mut self, word: &str) {
+    pub fn increment(&mut self, word: &str) {
         let key = word.to_string();
         let count = self.0.entry(key).or_insert(0);
         *count += 1;
     }
-    fn display(&self, filter: u64) {
+    pub fn display(&self, filter: u64) {
         // keep data in a vector for sorting by storing it the same structure as the hashmap
         let mut vec_count: Vec<(&String, &u64)> = self.0.iter().collect();
         // sort by value
@@ -31,25 +31,26 @@ impl WordCounter {
     }
 }
 
- mod food {
-	pub struct Cake;
-	struct Smoothie;
-	struct Fruit;
-}
+// mod food {
+//     pub struct Cake;
+//     struct Smoothie;
+//     struct Fruit;
+// }
 // create a directory for this and move it to its seperate directory
-
+#[allow(dead_code)]
 fn main() {
     let arguments: Vec<String> = env::args().collect();
     if arguments.len() < 2 {
         panic!("Please provide a filename!");
     }
     let filename = &arguments[1];
-    println!("Processing file: {}", filename);
+
     let file = File::open(filename).expect("Could not open file");
-    // File::create("foo.txt").expect("Could not create file");
+
     let reader = BufReader::new(file);
 
     let mut word_counter = WordCounter::new();
+
     for line in reader.lines() {
         let line = line.expect("Could not read line");
         let words = line.split(" ");
@@ -62,6 +63,8 @@ fn main() {
             }
         }
     }
-    let eat = food::Cake;
+    // let eat = food::Cake;
     word_counter.display(1);
 }
+
+
