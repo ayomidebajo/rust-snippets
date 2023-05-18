@@ -7,6 +7,8 @@ struct Task {
     completed: bool,
 }
 
+// TODO: make tasks come from args in command line
+
 impl TaskManager {
     fn new() -> Self {
         TaskManager(vec![])
