@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+use std::io;
+
 #[derive(Clone, Debug)]
-struct TaskManager(Vec<Task>);
+struct TaskManager(HashMap<u32, Task>);
 
 #[derive(Clone, Debug)]
 struct Task {
@@ -7,19 +10,19 @@ struct Task {
     completed: bool,
 }
 
-// TODO: make tasks come from args in command line
-
 impl TaskManager {
     fn new() -> Self {
-        TaskManager(vec![])
+        let new_manager: HashMap<u32, Task> = HashMap::new();
+        TaskManager(new_manager)
     }
 
     fn add(&mut self, task: Task) {
-        self.0.push(task);
+        let count = self.0.len() as u32;
+        self.0.insert(count, task);
     }
 
-    fn get_tasks(self) -> Vec<Task> {
-        self.0
+    fn get_tasks(&self) -> &HashMap<u32, Task> {
+        &self.0
     }
 }
 
@@ -53,10 +56,34 @@ trait Completed {
 }
 
 fn main() {
-    let new_task = Task::new("Some task".to_string());
     let mut tasks = TaskManager::new();
+    loop {
+        println!("Welcome to your task manager");
 
-    tasks.add(new_task);
+        println!("Please enter your task");
 
-    println!("robbing the bank {:?}", tasks.get_tasks());
+        let mut task_string = String::from("");
+        let stdin = io::stdin();
+
+        match stdin.read_line(&mut task_string) {
+            Ok(_) => {
+                println!("{:?}", task_string.trim());
+            }
+            Err(err) => println!("{:?}", err),
+        }
+
+        let task_string = task_string.trim();
+
+        let mut new_task = Task::new(task_string.to_string());
+        new_task.set_status(true);
+        tasks.add(new_task);
+
+        println!("Total tasks {:?}", tasks.get_tasks());
+        for task in tasks.get_tasks() {
+            println!(
+                "Task: {:?} completed {:?}",
+                task.1.description, task.1.completed
+            );
+        }
+    }
 }
