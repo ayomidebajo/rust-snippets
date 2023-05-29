@@ -1,13 +1,19 @@
 use std::collections::HashMap;
 
 fn main() {
-    println!("Hello, world!");
+    let mut trie = Trie::new();
+    trie.insert("apple".to_string());
+    println!("{}", trie.search("apple".to_string()));   // returns true
+    println!("{}", trie.search("app".to_string()));     // returns false
+    println!("{}", trie.starts_with("app".to_string())); // returns true
+    trie.insert("app".to_string());   
+    println!("{}", trie.search("app".to_string()));     // returns true
 }
 
 
-/*
-    TrieNode Implemention
-*/
+
+
+
 struct TrieNode {
     children: HashMap<char,TrieNode>,
     is_word: bool,
@@ -20,19 +26,10 @@ impl TrieNode {
 }
 
 
-/*
-    Trie Implementation
-*/
-
 struct Trie {
     root: TrieNode,
 }
 
-
-/** 
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl Trie {
 
     fn new() -> Self {
