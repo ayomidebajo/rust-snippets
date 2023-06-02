@@ -19,5 +19,6 @@ members = [
 	"word-counter",
 	"playing_traits",
 	"task_manager",
-	"datastructure_library"
+	"datastructure_library",
+	"image_compression_lib"
 ]
